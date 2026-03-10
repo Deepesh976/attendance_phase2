@@ -467,7 +467,8 @@ const months = useMemo(() => {
                       const rawVal = row[k];
 
                       const displayVal =
-                        totalKeys.includes(k) &&
+  totalKeys.includes(k) &&
+  !['al','pl','blOrMl','lop','daysWorked','daysPaid','totalDays'].includes(k) &&
                         !isNaN(rawVal) &&
                         rawVal !== '' &&
                         rawVal != null

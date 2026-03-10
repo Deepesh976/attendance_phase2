@@ -1,5 +1,6 @@
 const Slip = require('../models/Slip');
 const Employee = require('../models/Employee');
+const User = require('../models/User');
 const Salary = require('../models/Salary');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
@@ -464,7 +465,7 @@ exports.getMySlips = async (req, res) => {
   try {
     const user = req.user;
 
-    const employee = await Employee.findOne({ userId: user.id });
+    const employee = await Employee.findOne({ empId: user.empId });
     if (!employee) {
       return res.status(404).json({ error: 'Employee record not found for this user' });
     }
@@ -484,7 +485,7 @@ exports.deleteMySlip = async (req, res) => {
     const user = req.user;
     const slipId = req.params.id;
 
-    const employee = await Employee.findOne({ userId: user.id });
+    const employee = await Employee.findOne({ empId: user.empId });
     if (!employee) {
       return res.status(404).json({ error: 'Employee record not found for this user' });
     }
@@ -513,7 +514,7 @@ exports.generateMySlip = async (req, res) => {
       return res.status(400).json({ error: 'Month and year are required' });
     }
 
-    const employee = await Employee.findOne({ userId: user.id });
+    const employee = await Employee.findOne({ empId: user.empId });
     if (!employee) {
       return res.status(404).json({ error: 'Employee record not found for this user' });
     }
@@ -602,8 +603,8 @@ exports.generateMySlip = async (req, res) => {
       plMlBl: (salary.pl || 0) + (salary.blOrMl || 0),
       earnings,
       deductions,
-      month: cycleMeta.month,
-      year: cycleMeta.year
+      month: monthNumber,
+      year: parseInt(year, 10)
     });
 
     await slip.save();
@@ -635,20 +636,21 @@ exports.getMyAvailableSlipPeriods = async (req, res) => {
   try {
     const user = req.user;
 
-    const employee = await Employee.findOne({ userId: user.id });
+    const userData = await User.findById(user.id).populate('employeeId');
+const employee = userData.employeeId;
     if (!employee) {
       return res.status(404).json({ error: 'Employee record not found for this user' });
     }
 
-    const salaries = await Salary.find({ empId: employee.empId })
-      .select('month monthNumber year')
-      .sort({ year: -1, monthNumber: -1 });
+const salaries = await Salary.find({ empId: employee.empId })
+  .select('month monthNumber year')
+  .sort({ year: -1, monthNumber: -1 });
 
-    const periods = salaries.map((s) => ({
-      month: s.month,
-      monthNumber: s.monthNumber,
-      year: s.year
-    }));
+const periods = salaries.map((s) => ({
+  month: s.month || getMonthName(s.monthNumber),
+  monthNumber: s.monthNumber,
+  year: s.year
+}));
 
     res.json({
       employee: {
@@ -659,12 +661,12 @@ exports.getMyAvailableSlipPeriods = async (req, res) => {
       },
       availablePeriods: periods
     });
+
   } catch (error) {
     console.error('Error fetching available periods:', error);
     res.status(500).json({ error: error.message });
   }
 };
-
 // Get available months/years for a specific employee (admin, used by GenerateSlip)
 exports.getEmployeeAvailableSlipPeriods = async (req, res) => {
   try {

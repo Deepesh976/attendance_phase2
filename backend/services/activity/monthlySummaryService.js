@@ -91,10 +91,10 @@ const calculateMonthlySummary = (empId, empName, activities) => {
         totalALF += 1;
         break;
 
-      case 'ALH':
-        // Half day annual leave
-        totalALH += 0.5;
-        break;
+case 'ALH':
+  totalALH += 0.5;
+  totalPresent += 0.5;
+  break;
 
       case 'WO':
         totalWOCount += 1;
@@ -124,27 +124,27 @@ const calculateMonthlySummary = (empId, empName, activities) => {
      FINAL TOTAL DAYS
   ========================================================= */
 
-  const totalDays =
+const totalDays =
+  totalPresent +
+  totalAbsent +
+  totalWOCount +
+  totalHOCount +
+  totalALF +
+  totalALH; 
+
+  /* =========================================================
+     DAYS WORKED (FOR SALARY)
+  ========================================================= */
+
+  const daysWorked =
     totalPresent +
-    totalAbsent +
     totalWOCount +
     totalHOCount +
     totalALF +
     totalALH;
 
   /* =========================================================
-     DAYS WORKED (FOR SALARY)
-  ========================================================= */
-
-const daysWorked =
-  totalPresent +
-  totalWOCount +
-  totalHOCount +
-  totalALF +
-  totalALH;
-
-  /* =========================================================
-     DEBUG LOG (VERY USEFUL)
+     DEBUG LOG
   ========================================================= */
 
   console.log(

@@ -139,8 +139,8 @@ const MonthlySummaryPage = () => {
     return `${formatDate(summary.cycleStart)} – ${formatDate(summary.cycleEnd)}`;
   };
 
-  const totalAL =
-    (summary?.totalALF || 0) + (summary?.totalALH || 0) * 0.5;
+const totalAL =
+  (summary?.totalALF || 0) + (summary?.totalALH || 0);
 
   /* =====================================================
      RENDER
@@ -170,7 +170,9 @@ const MonthlySummaryPage = () => {
           <p style={styles.cycle}>{renderCycleRange()}</p>
 
           <div style={styles.grid}>
-            <div><b>Present:</b> {summary.totalPresent ?? 0}</div>
+            <div>
+  <b>Present:</b> {Number(summary.totalPresent || 0)}
+</div>
             <div><b>Absent:</b> {summary.totalAbsent ?? 0}</div>
 
             <div><b>Annual Leave Full:</b> {summary.totalALF ?? 0}</div>

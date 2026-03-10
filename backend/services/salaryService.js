@@ -359,11 +359,15 @@ const totalHO = safe(summary.totalHOCount);
 const totalALF = safe(summary.totalALF);
 const totalALH = safe(summary.totalALH);
 
-// days worked
-const daysWorked = totalPresent + totalWO + totalHO;
+// AL calculation
+const usedAL = totalALF + (totalALH * 0.5);
 
-// total annual leave
-const usedAL = totalALF + totalALH;
+// days worked (include ALH half-day worked)
+const daysWorked =
+  totalPresent +
+  (totalALH * 0.5) +
+  totalWO +
+  totalHO;
 
 // total days in payroll month
 const totalDaysInMonth = safe(summary.totalDays);

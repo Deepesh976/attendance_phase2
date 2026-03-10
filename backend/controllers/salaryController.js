@@ -334,12 +334,18 @@ employees.forEach(emp => {
 
     const totalDays = safe(summary.totalDays);
 
-    const present = safe(summary.totalPresent);
-    const weeklyOff = safe(summary.totalWOCount);
-    const holiday = safe(summary.totalHOCount);
+const present = safe(summary.totalPresent);
+const weeklyOff = safe(summary.totalWOCount);
+const holiday = safe(summary.totalHOCount);
+
+const alf = safe(summary.totalALF);
+const alh = safe(summary.totalALH);
+
+// 🔥 total AL (full + half)
+const al = alf + alh;
 
     // ✅ PAID DAYS = Present + WO + Holiday
-    const daysPaid = present + weeklyOff + holiday;
+    const daysPaid = present + weeklyOff + holiday + al;
 
     // ✅ LOP = Total Days - Paid Days
     const lop = Math.max(totalDays - daysPaid, 0);
@@ -366,6 +372,7 @@ employees.forEach(emp => {
       totalDays,
       daysWorked: daysPaid,
       daysPaid,
+      al,
       weeklyOff,
       holiday,
       lop,

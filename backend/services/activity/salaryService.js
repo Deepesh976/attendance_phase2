@@ -158,7 +158,7 @@ const computeDerivedFields = (data, existingData = {}) => {
      daysWorked = already calculated in generateSalaryRecords
      daysPaid   = daysWorked (unless manually changed)
      lop        = totalDays - daysPaid (unless manually changed)
-
+ 
   ================================= */
 
 const al = safe(data.al);
@@ -294,6 +294,7 @@ const daysPaid = isManuallyProvided(data.daysPaid, existingData.daysPaid)
     : grossPay + pfEmployerShare + esiEmployerShare + bonus;
 
   return {
+    al,
     lop,
     daysPaid,
     lop2,
@@ -479,9 +480,12 @@ const generateSalaryRecords = async () => {
          ANNUAL LEAVE (MANUAL ENTRY)
       =============================== */
 
-      const usedAL =
-        safe(summary.totalALF) +
-        safe(summary.totalALH);
+const totalALF = safe(summary.totalALF);
+const totalALH = safe(summary.totalALH);
+
+const usedAL =
+  totalALF +
+  (totalALH * 0.5);
 
       /* ===============================
          DAYS WORKED

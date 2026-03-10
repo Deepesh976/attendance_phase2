@@ -1033,7 +1033,7 @@ title={
             <div style={{ padding: '14px', border: '2px solid #bbf7d0', background: '#f0fdf4', borderRadius: '8px', textAlign: 'center' }}>
               <p style={{ fontSize: '11px', fontWeight: '700', color: '#166534' }}>PRESENT</p>
               <p style={{ fontSize: '28px', fontWeight: '800', color: '#16a34a' }}>
-                {summaryData.totalPresent ?? 0}
+                {Number(summaryData?.totalPresent || 0)}
               </p>
             </div>
 
