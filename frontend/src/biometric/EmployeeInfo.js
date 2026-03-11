@@ -3,7 +3,9 @@ import * as XLSX from 'xlsx';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { FaPlus, FaEdit, FaTrash, FaCloudUploadAlt, FaEraser, FaSearch, FaFilter, FaChevronLeft, FaChevronRight, FaCheckCircle, FaSpinner } from 'react-icons/fa';
 import axios from '../api/axios';
+import EmployeeEditModal from './EmployeeEditModal';
 import './EmployeeInfo.css';
 
 const styles = {
@@ -346,6 +348,8 @@ const EmployeeInfo = () => {
   const [uploading, setUploading] = useState(false);
   const [hoveredBtn, setHoveredBtn] = useState(null);
   const [empUnit, setEmpUnit] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
   const limit = 10;
 
   // 🔐 Role-based access from localStorage
@@ -506,6 +510,11 @@ const EmployeeInfo = () => {
     return new Date(dateString).toISOString().split('T')[0];
   };
 
+  const handleAdd = () => {
+    setSelectedEmployeeId(null);
+    setIsModalOpen(true);
+  };
+
   const handleEdit = () => {
     if (!canManage) {
       toast.error('You are not authorized to edit employees.');
@@ -523,7 +532,8 @@ const EmployeeInfo = () => {
 
     const selectedEmployee = data.find((emp) => emp._id === selectedIds[0]);
     if (selectedEmployee && selectedEmployee._id) {
-      navigate(`/edit-employee-info/${selectedEmployee._id}`);
+      setSelectedEmployeeId(selectedEmployee._id);
+      setIsModalOpen(true);
     } else {
       toast.error('Could not find selected employee’s ID');
     }
@@ -659,97 +669,123 @@ const filteredData = data.filter((emp) => {
         </div>
 
         {/* Controls Card */}
-        <div className="controls-section controls-top">
-          <input
-            className="search-input"
-            type="text"
-            placeholder="Search by name or ID"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <select
-            className="department-select"
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-          >
-            <option value="">All Departments</option>
-            {departmentOptions.map((dep) => (
-              <option key={dep} value={dep}>
-                {dep}
-              </option>
-            ))}
-          </select>
+        <div className="controls-card">
+          <div className="filter-row">
+            <div className="search-box">
+              <FaSearch className="icon-search" />
+              <input
+                className="search-input"
+                type="text"
+                placeholder="Search name or ID..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
 
-          <select
-            className="empUnit-select"
-            value={empUnit}
-            onChange={(e) => setEmpUnit(e.target.value)}
-          >
-            <option value="">All Units</option>
-            {empUnitOptions.map((dep) => (
-              <option key={dep} value={dep}>
-                {dep}
-              </option>
-            ))}
-          </select>
+            <div className="filter-group">
+              <div className="filter-select-wrapper">
+                <FaFilter className="icon-filter" />
+                <select
+                  className="filter-select"
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                >
+                  <option value="">All Departments</option>
+                  {departmentOptions.map((dep) => (
+                    <option key={dep} value={dep}>
+                      {dep}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="filter-select-wrapper">
+                <FaFilter className="icon-filter" />
+                <select
+                  className="filter-select"
+                  value={empUnit}
+                  onChange={(e) => setEmpUnit(e.target.value)}
+                >
+                  <option value="">All Units</option>
+                  {empUnitOptions.map((unit) => (
+                    <option key={unit} value={unit}>
+                      {unit}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
 
           {canManage && (
-            <>
-              <label
-                htmlFor="upload"
-                className={`btn btn-upload ${uploading ? 'disabled' : ''}`}
-              >
-                {uploading ? 'Uploading...' : 'Upload Excel'}
-              </label>
-              <input
-                id="upload"
-                type="file"
-                accept=".xlsx, .xls"
-                style={{ display: 'none' }}
-                onChange={uploading ? undefined : handleUpload}
-                disabled={uploading}
-              />
+            <div className="actions-row">
+              <div className="action-group">
+                <label
+                  htmlFor="upload"
+                  className={`btn btn-upload ${uploading ? 'disabled' : ''}`}
+                >
+                  {uploading ? <FaSpinner className="spin" /> : <FaCloudUploadAlt />}
+                  {uploading ? 'Uploading...' : 'Upload Excel'}
+                </label>
+                <input
+                  id="upload"
+                  type="file"
+                  accept=".xlsx, .xls"
+                  style={{ display: 'none' }}
+                  onChange={uploading ? undefined : handleUpload}
+                  disabled={uploading}
+                />
 
-              <button
-                onClick={() => navigate('/add-employee-info')}
-                className="btn btn-primary"
-              >
-                + Add Employee
-              </button>
-              <button
-                onClick={handleEdit}
-                className="btn btn-secondary"
-              >
-                ✏️ Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                className="btn btn-danger"
-              >
-                🗑️ Delete
-              </button>
-
-              {canDeleteAll && (
                 <button
-                  onClick={handleDeleteAll}
-                  className="btn btn-danger"
+                  onClick={handleAdd}
+                  className="btn btn-primary"
                   disabled={uploading}
                 >
-                  Remove All
+                  <FaPlus /> Add Employee
                 </button>
-              )}
+              </div>
+
+              <div className="action-group">
+                <button
+                  onClick={handleEdit}
+                  className="btn btn-secondary"
+                  disabled={uploading || data.length === 0}
+                  title={data.length === 0 ? 'No employees to edit' : 'Select an employee to edit'}
+                >
+                  <FaEdit /> Edit
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="btn btn-danger"
+                  disabled={uploading || data.length === 0}
+                  title={data.length === 0 ? 'No employees to delete' : 'Select employees to delete'}
+                >
+                  <FaTrash /> Delete
+                </button>
+
+                {canDeleteAll && (
+                  <button
+                    onClick={handleDeleteAll}
+                    className="btn btn-danger-outline"
+                    disabled={uploading || data.length === 0}
+                    title={data.length === 0 ? 'No employees to remove' : 'Remove all employee data'}
+                  >
+                    <FaEraser /> Remove All
+                  </button>
+                )}
+              </div>
 
               {fileUploaded && !uploading && (
-                <span className="status-indicator">
-                  ✅ Uploaded
-                </span>
+                <div className="upload-status-badge success">
+                  <FaCheckCircle /> Uploaded
+                </div>
               )}
               {uploading && (
-                <span className="status-indicator">
-                  ⏳ Uploading...
-                </span>
+                <div className="upload-status-badge processing">
+                  <FaSpinner className="spin" /> Processing
+                </div>
               )}
-            </>
+            </div>
           )}
         </div>
 
@@ -822,20 +858,28 @@ const filteredData = data.filter((emp) => {
             onClick={() => setPage((p) => p - 1)}
             disabled={page === 1}
           >
-            ← Prev
+            <FaChevronLeft /> Prev
           </button>
-          <span className="pagination-info">
+          <div className="pagination-info">
             Page <strong>{page}</strong> / <strong>{totalPages}</strong>
-          </span>
+          </div>
           <button
             className="pagination-btn"
             onClick={() => setPage((p) => p + 1)}
             disabled={page === totalPages}
           >
-            Next →
+            Next <FaChevronRight />
           </button>
         </div>
       </div>
+
+      {/* Employee Modal */}
+      <EmployeeEditModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        employeeId={selectedEmployeeId}
+        onSave={fetchEmployeeData}
+      />
     </div>
   );
 };

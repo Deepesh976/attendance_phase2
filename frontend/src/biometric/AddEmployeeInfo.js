@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaArrowLeft, FaSave, FaTimes, FaCalendarAlt } from 'react-icons/fa';
 import axios from '../api/axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -31,25 +32,31 @@ const styles = {
     margin: 0
   },
   backBtn: {
-    backgroundColor: '#6c757d',
+    backgroundColor: '#64748b',
     color: '#fff',
-    padding: '0.5rem 1.2rem',
+    padding: '0.5rem 1.25rem',
     border: 'none',
-    borderRadius: 8,
+    borderRadius: 10,
     cursor: 'pointer',
-    fontWeight: 600
+    fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
   },
   sectionTitle: {
-    fontSize: '1.2rem',
-    fontWeight: 600,
-    margin: '2rem 0 1rem',
-    borderBottom: '1px solid #ccc',
+    fontSize: '1.25rem',
+    fontWeight: 700,
+    margin: '2.5rem 0 1.25rem',
+    color: '#1e293b',
+    borderBottom: '2px solid #e2e8f0',
     paddingBottom: '0.5rem'
   },
   formGroup: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '1rem',
+    gap: '1.25rem',
     boxSizing: 'border-box'
   },
   fieldWrapper: {
@@ -63,49 +70,64 @@ const styles = {
     top: '-10px',
     left: '12px',
     background: '#fff',
-    padding: '0 5px',
-    fontSize: '0.85rem',
-    color: '#555',
+    padding: '0 8px',
+    fontSize: '0.8rem',
+    fontWeight: 600,
+    color: '#64748b',
     zIndex: 1
   },
   input: {
     width: '100%',
     padding: '0.8rem 2.5rem 0.8rem 0.8rem',
-    borderRadius: 8,
-    border: '1px solid #ccc',
-    fontSize: '1rem',
+    borderRadius: 10,
+    border: '2px solid #e2e8f0',
+    fontSize: '0.95rem',
     outline: 'none',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    transition: 'all 0.2s ease',
+    background: '#f8fafc'
   },
   icon: {
     position: 'absolute',
-    right: '10px',
+    right: '12px',
     top: '50%',
     transform: 'translateY(-50%)',
     cursor: 'pointer',
-    fontSize: '1.2rem',
-    color: '#555'
+    fontSize: '1.1rem',
+    color: '#94a3b8',
+    pointerEvents: 'none'
   },
   greenBtn: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#2563eb',
     color: '#fff',
-    padding: '0.6rem 1.5rem',
+    padding: '0.75rem 2rem',
     border: 'none',
-    borderRadius: 8,
+    borderRadius: 10,
     cursor: 'pointer',
-    marginTop: '2rem',
-    fontWeight: 600
+    marginTop: '2.5rem',
+    fontWeight: 600,
+    fontSize: '1rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.6rem',
+    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)',
+    transition: 'all 0.2s ease'
   },
   grayBtn: {
-    backgroundColor: '#6c757d',
-    color: '#fff',
-    padding: '0.6rem 1.5rem',
-    border: 'none',
-    borderRadius: 8,
+    backgroundColor: '#f1f5f9',
+    color: '#475569',
+    padding: '0.75rem 2rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: 10,
     cursor: 'pointer',
     marginLeft: '1rem',
-    marginTop: '2rem',
-    fontWeight: 600
+    marginTop: '2.5rem',
+    fontWeight: 600,
+    fontSize: '1rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.6rem',
+    transition: 'all 0.2s ease'
   }
 };
 
@@ -278,7 +300,7 @@ await axios.post('/employees', mappedData);
           onClick={() => navigate('/employee-info')}
           style={styles.backBtn}
         >
-          ← Back
+          <FaArrowLeft /> Back
         </button>
 
         <h2 style={styles.heading}>Add Employee Info</h2>
@@ -368,7 +390,7 @@ await axios.post('/employees', mappedData);
                             style={styles.icon}
                             onClick={() => dateRefs[key]?.current?.showPicker?.()}
                           >
-                            📅
+                            <FaCalendarAlt />
                           </span>
                         )}
                       </>
@@ -379,13 +401,15 @@ await axios.post('/employees', mappedData);
             </div>
           </div>
         ))}
-        <button type="submit" style={styles.greenBtn}>Save</button>
+        <button type="submit" style={styles.greenBtn}>
+          <FaSave /> Save
+        </button>
         <button
           type="button"
           style={styles.grayBtn}
           onClick={() => navigate('/employee-info')}
         >
-          Cancel
+          <FaTimes /> Cancel
         </button>
       </form>
     </div>

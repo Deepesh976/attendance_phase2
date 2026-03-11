@@ -109,7 +109,7 @@ const createDirector = async (directorData) => {
   const director = new User({
     name: name.trim(),
     username,
-    phone: /^\d{10}$/.test(username) ? username : null,
+    phone: username,
     email: email || null,
     password: 'accord@123',          // 🔑 default password
     role: 'director',

@@ -648,10 +648,8 @@ const getStatusColor = (status) => {
       className={`ea-status ${item.status} ${
         item.isStatusModified ? 'ea-status-modified' : ''
       }`}
-      onClick={() =>
-  canEditStatus &&
-  !['HO', 'WO'].includes(item.status) &&
-  openStatusEditModal(item)
+onClick={() =>
+  canEditStatus && openStatusEditModal(item)
 }
 title={
   item.status === 'HO'

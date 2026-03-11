@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { FaArrowLeft, FaSave } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from '../api/axios';
@@ -114,25 +115,29 @@ const EditEmployeeInfo = () => {
           onMouseEnter={() => setIsBackHover(true)}
           onMouseLeave={() => setIsBackHover(false)}
           style={{
-            backgroundColor: '#6c757d',
+            backgroundColor: '#64748b',
             color: '#fff',
-            padding: '0.45rem 1.2rem',
+            padding: '0.45rem 1.25rem',
             border: 'none',
-            borderRadius: 8,
+            borderRadius: 10,
             cursor: 'pointer',
             fontWeight: 600,
             fontSize: '0.95rem',
-            transition: 'all 0.15s ease-in-out',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             ...(isBackHover
               ? {
-                  backgroundColor: '#5a6268',
+                  backgroundColor: '#475569',
                   transform: 'translateY(-1px)',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
                 }
               : {}),
           }}
         >
-          ← Back
+          <FaArrowLeft /> Back
         </button>
 
         <h2
@@ -187,23 +192,28 @@ const EditEmployeeInfo = () => {
           style={{
             gridColumn: 'span 2',
             textAlign: 'center',
-            marginTop: '1.5rem',
+            marginTop: '2rem',
           }}
         >
           <button
             type="submit"
             style={{
-              backgroundColor: '#007bff',
+              backgroundColor: '#2563eb',
               color: '#fff',
-              padding: '0.8rem 2rem',
+              padding: '0.8rem 2.5rem',
               border: 'none',
-              borderRadius: 8,
+              borderRadius: 10,
               fontSize: '1rem',
               cursor: 'pointer',
-              fontWeight: 600,
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)',
+              transition: 'all 0.2s ease',
             }}
           >
-            Save Changes
+            <FaSave /> Save Changes
           </button>
         </div>
       </form>

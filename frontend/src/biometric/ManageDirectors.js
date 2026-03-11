@@ -521,13 +521,13 @@ const resetForm = () => {
 </div>
 
                   <div className="form-group">
-                    <label className="form-label">Username *</label>
+                    <label className="form-label">Phone Number *</label>
                     <input
                       type="text"
                       className="form-input"
                       value={formData.username}
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      placeholder="Enter username"
+                      placeholder="Enter Phone Number"
                       required
                     />
                   </div>
@@ -609,13 +609,13 @@ const resetForm = () => {
 </div>
 
                   <div className="form-group">
-                    <label className="form-label">Username *</label>
+                    <label className="form-label">Phone Number *</label>
                     <input
                       type="text"
                       className="form-input"
                       value={formData.username}
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      placeholder="Enter username"
+                      placeholder="Enter Phone Number"
                       required
                     />
                   </div>
@@ -802,7 +802,7 @@ const resetForm = () => {
                           <table className="directors-table">
                             <thead>
                               <tr>
-                                <th>Username</th>
+                                <th>Phone Number</th>
                                 <th>Email</th>
                                 <th>Employees</th>
                                 <th>Action</th>

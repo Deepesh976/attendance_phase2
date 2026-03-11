@@ -13,7 +13,38 @@ const responsiveStyles = `
     padding-top: 80px !important;
   }
 
-  /* Date input placeholder styling */
+  /* Enhanced select dropdown styling */
+  select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: #1e293b;
+    background-color: #f8fafc;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232563eb' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+
+  select:hover {
+    border-color: #cbd5e1;
+    background-color: #fff;
+  }
+
+  select:focus {
+    background-color: #fff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08), 0 0 0 1.5px #2563eb;
+  }
+
+  /* Date input styling */
   input[type="date"]::placeholder {
     color: #94a3b8;
     font-weight: 500;
@@ -22,9 +53,9 @@ const responsiveStyles = `
   input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     color: #2563eb;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   }
 
-  /* Make date inputs more visible */
   input[type="date"] {
     color-scheme: light;
   }
@@ -35,6 +66,31 @@ const responsiveStyles = `
 
   input[type="date"]:invalid {
     color: #94a3b8;
+  }
+
+  input[type="tel"]::-webkit-outer-spin-button,
+  input[type="tel"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Enhanced table styling */
+  .leave-table tbody tr {
+    transition: all 0.2s ease;
+  }
+
+  .leave-table tbody tr:hover {
+    background-color: #f0f7ff !important;
+    border-left: 3px solid #2563eb;
+  }
+
+  /* Status badge animations */
+  .status-badge {
+    transition: all 0.2s ease;
+  }
+
+  .status-badge:hover {
+    transform: scale(1.05);
   }
 
   @media (max-width: 1024px) {
@@ -76,6 +132,9 @@ const responsiveStyles = `
     }
     .leave-submit-btn {
       width: 100% !important;
+    }
+    select {
+      padding: 0.8rem 1rem 0.8rem 1rem !important;
     }
   }
 
@@ -123,7 +182,7 @@ const responsiveStyles = `
       font-size: 0.85rem !important;
       margin-bottom: 0.5rem !important;
     }
-    .input, .textarea {
+    .input, .textarea, select {
       padding: 0.75rem 1rem !important;
       font-size: 0.9rem !important;
     }
@@ -177,7 +236,8 @@ const responsiveStyles = `
   }
 
   .table-scroll::-webkit-scrollbar {
-    height: 6px;
+    height: 8px;
+    background: #f1f5f9;
   }
 
   .table-scroll::-webkit-scrollbar-track {
@@ -186,12 +246,13 @@ const responsiveStyles = `
   }
 
   .table-scroll::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
     border-radius: 10px;
+    border: 2px solid #f1f5f9;
   }
 
   .table-scroll::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
   }
 `;
 
@@ -207,101 +268,113 @@ const styles = {
     margin: '0 auto',
   },
   headerSection: {
-    marginBottom: '2rem',
-    paddingBottom: '1.5rem',
+    marginBottom: '2.5rem',
+    paddingBottom: '2rem',
+    borderBottom: '2px solid rgba(255, 255, 255, 0.4)',
   },
   titleBlock: {
-    marginBottom: '1.5rem',
+    marginBottom: '2rem',
   },
   title: {
-    fontSize: '2.5rem',
+    fontSize: '2.8rem',
     fontWeight: 900,
     color: '#0f172a',
     margin: 0,
     letterSpacing: '-1.5px',
     lineHeight: 1.1,
+    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
   },
   subtitle: {
-    fontSize: '0.95rem',
+    fontSize: '1rem',
     color: '#64748b',
-    marginTop: '0.35rem',
-    fontWeight: 400,
+    marginTop: '0.5rem',
+    fontWeight: 500,
+    letterSpacing: '-0.2px',
   },
   balanceCardsContainer: {
-    display: 'flex',
-    gap: '1rem',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '1.25rem',
     flexWrap: 'wrap',
   },
   balanceCard: {
-    flex: '1 1 calc(25% - 0.75rem)',
-    minWidth: '160px',
-    padding: '1.25rem',
-    background: '#fff',
+    padding: '1.5rem',
+    background: 'linear-gradient(135deg, #fff 0%, #f8fafc 100%)',
     borderRadius: '14px',
-    border: '1px solid #e2e8f0',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+    border: '2px solid #e2e8f0',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
     transition: 'all 0.3s ease',
     cursor: 'default',
     position: 'relative',
     overflow: 'hidden',
   },
   balanceCardHover: {
-    transform: 'translateY(-4px)',
-    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.08)',
+    transform: 'translateY(-6px)',
+    boxShadow: '0 12px 24px rgba(37, 99, 235, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+    borderColor: '#2563eb',
   },
   balanceLabel: {
-    fontSize: '0.75rem',
-    fontWeight: 700,
+    fontSize: '0.7rem',
+    fontWeight: 800,
     color: '#64748b',
     textTransform: 'uppercase',
-    letterSpacing: '0.8px',
-    marginBottom: '0.5rem',
+    letterSpacing: '1px',
+    marginBottom: '0.75rem',
   },
   balanceValue: {
-    fontSize: '2.2rem',
+    fontSize: '2.5rem',
     fontWeight: 900,
     color: '#2563eb',
-    marginBottom: '0.35rem',
+    marginBottom: '0.5rem',
+    lineHeight: 1,
   },
   balanceSubtext: {
     fontSize: '0.75rem',
     color: '#94a3b8',
-    lineHeight: 1.4,
+    lineHeight: 1.6,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.3rem',
   },
   mainCard: {
     background: '#fff',
     borderRadius: '16px',
-    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
     border: '1px solid #e2e8f0',
     overflow: 'hidden',
-    marginBottom: '1.5rem',
+    marginBottom: '1.75rem',
+    transition: 'all 0.3s ease',
   },
   cardHeader: {
-    padding: '1.75rem',
-    borderBottom: '2px solid #f8fafc',
+    padding: '2rem',
+    borderBottom: '2px solid #f0f4f9',
     background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+    position: 'relative',
   },
   cardTitle: {
-    fontSize: '1.5rem',
+    fontSize: '1.6rem',
     fontWeight: 800,
     color: '#0f172a',
     margin: 0,
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem',
+    gap: '0.8rem',
     letterSpacing: '-0.5px',
   },
   cardTitleIcon: {
-    fontSize: '1.5rem',
+    fontSize: '1.8rem',
   },
   cardContent: {
-    padding: '1.75rem',
+    padding: '2rem',
   },
   formRow: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '1.5rem',
-    marginBottom: '1.5rem',
+    gap: '1.75rem',
+    marginBottom: '1.75rem',
   },
   formGroup: {
     display: 'flex',
@@ -311,18 +384,19 @@ const styles = {
     fontSize: '0.9rem',
     fontWeight: 700,
     color: '#1e293b',
-    marginBottom: '0.6rem',
+    marginBottom: '0.7rem',
     display: 'block',
     letterSpacing: '-0.3px',
   },
   labelSmall: {
     fontSize: '0.85rem',
-    fontWeight: 600,
+    fontWeight: 700,
     color: '#1e293b',
+    letterSpacing: '-0.2px',
   },
   input: {
     width: '100%',
-    padding: '0.8rem 1rem',
+    padding: '0.9rem 1.1rem',
     borderRadius: '10px',
     border: '1.5px solid #e2e8f0',
     fontSize: '0.9rem',
@@ -339,10 +413,10 @@ const styles = {
   },
   textarea: {
     width: '100%',
-    padding: '0.8rem 1rem',
+    padding: '0.9rem 1.1rem',
     borderRadius: '10px',
     border: '1.5px solid #e2e8f0',
-    minHeight: '100px',
+    minHeight: '110px',
     resize: 'vertical',
     fontSize: '0.9rem',
     fontFamily: 'inherit',
@@ -360,8 +434,8 @@ const styles = {
   checkboxWrapper: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.65rem',
-    padding: '1rem',
+    gap: '0.75rem',
+    padding: '1.1rem',
     borderRadius: '10px',
     border: '1.5px solid #e2e8f0',
     backgroundColor: '#f8fafc',
@@ -371,37 +445,38 @@ const styles = {
   checkboxWrapperActive: {
     backgroundColor: '#eff6ff',
     borderColor: '#2563eb',
+    boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.08)',
   },
   checkbox: {
-    width: '18px',
-    height: '18px',
+    width: '20px',
+    height: '20px',
     cursor: 'pointer',
     accentColor: '#2563eb',
   },
   buttonGroup: {
     display: 'flex',
     gap: '0.75rem',
-    marginTop: '1.5rem',
-    paddingTop: '1.5rem',
+    marginTop: '2rem',
+    paddingTop: '2rem',
     borderTop: '1px solid #f0f4f9',
   },
   submit: {
     background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
     color: '#fff',
     border: 'none',
-    padding: '1rem 2.5rem',
+    padding: '1.05rem 2.75rem',
     borderRadius: '10px',
-    fontWeight: 700,
+    fontWeight: 800,
     cursor: 'pointer',
     fontSize: '0.9rem',
     transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
+    boxShadow: '0 6px 16px rgba(37, 99, 235, 0.3)',
     textTransform: 'uppercase',
-    letterSpacing: '0.6px',
+    letterSpacing: '0.7px',
   },
   submitHover: {
     transform: 'translateY(-2px)',
-    boxShadow: '0 8px 20px rgba(37, 99, 235, 0.35)',
+    boxShadow: '0 10px 24px rgba(37, 99, 235, 0.4)',
   },
   submitDisabled: {
     opacity: 0.6,
@@ -409,21 +484,22 @@ const styles = {
     transform: 'none',
   },
   listSection: {
-    marginTop: '1.5rem',
-    paddingTop: '1.5rem',
-    borderTop: '1px solid #f0f4f9',
+    marginTop: '0',
+    paddingTop: '0',
+    borderTop: 'none',
   },
   listTitle: {
-    fontSize: '1.3rem',
+    fontSize: '1.4rem',
     fontWeight: 800,
     color: '#0f172a',
-    marginBottom: '1.25rem',
+    marginBottom: '1.5rem',
     letterSpacing: '-0.5px',
   },
   tableWrapper: {
     overflowX: 'auto',
-    borderRadius: '10px',
+    borderRadius: '12px',
     border: '1px solid #e2e8f0',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
   },
   table: {
     width: '100%',
@@ -434,63 +510,69 @@ const styles = {
     textAlign: 'left',
     background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
     color: '#0f172a',
-    padding: '1rem',
+    padding: '1.1rem 1rem',
     fontWeight: 700,
     borderBottom: '2px solid #e2e8f0',
     fontSize: '0.8rem',
     textTransform: 'uppercase',
-    letterSpacing: '0.6px',
+    letterSpacing: '0.7px',
   },
   td: {
-    padding: '1rem',
-    borderBottom: '1px solid #e2e8f0',
+    padding: '1.1rem 1rem',
+    borderBottom: '1px solid #f0f4f9',
     color: '#475569',
   },
   tdHover: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f0f7ff',
   },
   statusBadge: {
-    padding: '0.4rem 0.75rem',
-    borderRadius: '6px',
+    padding: '0.45rem 0.9rem',
+    borderRadius: '8px',
     fontWeight: 700,
     fontSize: '0.7rem',
     display: 'inline-block',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.6px',
+    border: '1.5px solid',
   },
   statusPending: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: '#fffbeb',
     color: '#92400e',
+    borderColor: '#fbbf24',
   },
   statusApproved: {
-    backgroundColor: '#d1fae5',
+    backgroundColor: '#ecfdf5',
     color: '#065f46',
+    borderColor: '#6ee7b7',
   },
   statusRejected: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: '#fef2f2',
     color: '#991b1b',
+    borderColor: '#fca5a5',
   },
   statusCancelled: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#f9fafb',
     color: '#374151',
+    borderColor: '#e5e7eb',
   },
   emptyState: {
     textAlign: 'center',
-    padding: '2.5rem 1rem',
+    padding: '3rem 1rem',
   },
   emptyIcon: {
-    fontSize: '3.5rem',
-    marginBottom: '1rem',
-    opacity: 0.7,
+    fontSize: '4rem',
+    marginBottom: '1.5rem',
+    opacity: 0.6,
   },
   emptyText: {
-    fontSize: '1rem',
-    fontWeight: 600,
+    fontSize: '1.1rem',
+    fontWeight: 700,
     color: '#475569',
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
+    letterSpacing: '-0.3px',
   },
   emptySubtext: {
-    fontSize: '0.9rem',
+    fontSize: '0.95rem',
     color: '#94a3b8',
   },
 };
@@ -608,7 +690,11 @@ const EmployeeLeaveRequest = () => {
     else if (s === 'rejected') style = styles.statusRejected;
     else if (s === 'cancelled') style = styles.statusCancelled;
 
-    return <span style={{ ...styles.statusBadge, ...style }}>{s.toUpperCase()}</span>;
+    return (
+      <span style={{ ...styles.statusBadge, ...style }} className="status-badge">
+        {s.toUpperCase()}
+      </span>
+    );
   };
 
   return (
@@ -812,42 +898,67 @@ const EmployeeLeaveRequest = () => {
                     <table style={styles.table} className="leave-table">
                       <thead>
                         <tr>
-                          <th style={{ ...styles.th }} className="table-header">ID</th>
-                          <th style={{ ...styles.th }} className="table-header">Applied</th>
-                          <th style={{ ...styles.th }} className="table-header">Start</th>
-                          <th style={{ ...styles.th }} className="table-header">End</th>
-                          <th style={{ ...styles.th }} className="table-header">Days</th>
-                          <th style={{ ...styles.th }} className="table-header">Type</th>
-                          <th style={{ ...styles.th }} className="table-header">Status</th>
+                          <th style={{ ...styles.th }} className="table-header">
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>📌 ID</span>
+                          </th>
+                          <th style={{ ...styles.th }} className="table-header">
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>📅 Applied</span>
+                          </th>
+                          <th style={{ ...styles.th }} className="table-header">
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>▶️ Start</span>
+                          </th>
+                          <th style={{ ...styles.th }} className="table-header">
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>⏹️ End</span>
+                          </th>
+                          <th style={{ ...styles.th }} className="table-header">
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>⏱️ Days</span>
+                          </th>
+                          <th style={{ ...styles.th }} className="table-header">
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>🏷️ Type</span>
+                          </th>
+                          <th style={{ ...styles.th }} className="table-header">
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>✔️ Status</span>
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {leaves.map((lv) => (
                           <tr
                             key={lv._id}
-                            style={hoveredRow === lv._id ? { ...styles.tdHover } : {}}
+                            style={hoveredRow === lv._id ? { ...styles.td, ...styles.tdHover } : styles.td}
                             onMouseEnter={() => setHoveredRow(lv._id)}
                             onMouseLeave={() => setHoveredRow(null)}
                           >
                             <td style={{ ...styles.td }} className="table-cell">
-                              <span style={{ fontWeight: 700, color: '#2563eb' }}>
+                              <span style={{ fontWeight: 800, color: '#2563eb', fontSize: '0.9rem' }}>
                                 {lv.leaveRequestId || `LR-${lv._id.slice(-4).toUpperCase()}`}
                               </span>
                             </td>
                             <td style={{ ...styles.td }} className="table-cell">
-                              {new Date(lv.appliedAt || lv.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                                {new Date(lv.appliedAt || lv.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              </span>
                             </td>
                             <td style={{ ...styles.td }} className="table-cell">
-                              {new Date(lv.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                                {new Date(lv.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              </span>
                             </td>
                             <td style={{ ...styles.td }} className="table-cell">
-                              {new Date(lv.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                                {new Date(lv.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              </span>
                             </td>
                             <td style={{ ...styles.td }} className="table-cell">
-                              <strong>{lv.totalDays || 0}</strong>{lv.isHalfDay && <span style={{ fontSize: '0.75rem', marginLeft: '0.25rem' }}>½</span>}
+                              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#2563eb' }}>
+                                {lv.totalDays || 0}
+                              </span>
+                              {lv.isHalfDay && <span style={{ fontSize: '0.75rem', marginLeft: '0.5rem', color: '#64748b', fontWeight: 700 }}>½</span>}
                             </td>
                             <td style={{ ...styles.td }} className="table-cell">
-                              <span style={{ fontWeight: 700, fontSize: '0.8rem' }}>{lv.leaveType || lv.type}</span>
+                              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1e293b' }}>
+                                {lv.leaveType || lv.type}
+                              </span>
                             </td>
                             <td style={{ ...styles.td }} className="table-cell">{statusBadge(lv.status)}</td>
                           </tr>

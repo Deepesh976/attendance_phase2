@@ -24,6 +24,12 @@ const ManageHRs = () => {
     unit: '',
   });
 
+  const [errors, setErrors] = useState({
+    name: '',
+    username: '',
+    unit: '',
+  });
+
   /* ================= INITIAL LOAD ================= */
   useEffect(() => {
     const userRole = localStorage.getItem('role');
@@ -65,6 +71,7 @@ const ManageHRs = () => {
 
   const resetForm = () => {
     setFormData({ name: '', username: '', unit: '' });
+    setErrors({ name: '', username: '', unit: '' });
     setCurrentHR(null);
   };
 
@@ -76,11 +83,32 @@ const ManageHRs = () => {
 
   /* ================= CREATE ================= */
 
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+
+    if (!formData.username.trim()) {
+      newErrors.username = 'Phone number is required';
+    } else if (!/^\d{10}$/.test(formData.username)) {
+      newErrors.username = 'Phone must be exactly 10 digits';
+    }
+
+    if (!formData.unit.trim()) {
+      newErrors.unit = 'Unit selection is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
 
-    if (!/^\d{10}$/.test(formData.username)) {
-      toast.error('Phone must be 10 digits');
+    if (!validateForm()) {
+      toast.error('Please fix the form errors');
       return;
     }
 
@@ -112,8 +140,8 @@ const ManageHRs = () => {
   const handleEdit = async (e) => {
     e.preventDefault();
 
-    if (!/^\d{10}$/.test(formData.username)) {
-      toast.error('Phone must be 10 digits');
+    if (!validateForm()) {
+      toast.error('Please fix the form errors');
       return;
     }
 
@@ -224,6 +252,9 @@ const ManageHRs = () => {
             <div className="modal-dialog">
               <div className="modal-header">
                 <h2>
+                  <span style={{ fontSize: '1.8rem' }}>
+                    {showEditModal ? '✏️' : '➕'}
+                  </span>
                   {showEditModal ? 'Edit Sub HR' : 'Create Sub HR'}
                 </h2>
                 <button className="modal-close" onClick={closeModal}>
@@ -234,41 +265,77 @@ const ManageHRs = () => {
               <form onSubmit={showEditModal ? handleEdit : handleCreate}>
                 <div className="modal-body">
 
-                  <div className="form-group">
-                    <label>Name *</label>
+                  <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
+                    <label htmlFor="name">Full Name *</label>
                     <input
+                      id="name"
                       type="text"
+                      placeholder="Enter HR's full name"
                       value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        if (e.target.value.trim()) {
+                          setErrors({ ...errors, name: '' });
+                        }
+                      }}
+                      onBlur={() => {
+                        if (!formData.name.trim()) {
+                          setErrors({ ...errors, name: 'Name is required' });
+                        }
+                      }}
                       required
                     />
+                    {errors.name && <div className="form-error-message">⚠️ {errors.name}</div>}
                   </div>
 
-                  <div className="form-group">
-                    <label>Phone *</label>
+                  <div className={`form-group ${errors.username ? 'has-error' : ''}`}>
+                    <label htmlFor="phone">Phone Number *</label>
                     <input
+                      id="phone"
                       type="text"
+                      placeholder="Enter 10-digit phone number"
                       maxLength={10}
                       value={formData.username}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const numOnly = e.target.value.replace(/\D/g, '');
                         setFormData({
                           ...formData,
-                          username: e.target.value.replace(/\D/g, '')
-                        })
-                      }
+                          username: numOnly
+                        });
+                        if (numOnly.length === 10) {
+                          setErrors({ ...errors, username: '' });
+                        }
+                      }}
+                      onBlur={() => {
+                        if (formData.username.length !== 10) {
+                          setErrors({ ...errors, username: 'Phone must be exactly 10 digits' });
+                        }
+                      }}
                       required
                     />
+                    {errors.username ? (
+                      <div className="form-error-message">⚠️ {errors.username}</div>
+                    ) : (
+                      <div className="form-help-text">Format: 10 digits (numbers only)</div>
+                    )}
                   </div>
 
-                  <div className="form-group">
-                    <label>Unit *</label>
+                  <div className={`form-group ${errors.unit ? 'has-error' : ''}`}>
+                    <label htmlFor="unit">Unit *</label>
                     <select
+                      id="unit"
                       value={formData.unit}
-                      onChange={(e) =>
-                        setFormData({ ...formData, unit: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, unit: e.target.value });
+                        if (e.target.value.trim()) {
+                          setErrors({ ...errors, unit: '' });
+                        }
+                      }}
+                      onBlur={() => {
+                        if (!formData.unit.trim()) {
+                          setErrors({ ...errors, unit: 'Unit selection is required' });
+                        }
+                      }}
                       required
                     >
                       <option value="">Select Unit</option>
@@ -278,6 +345,7 @@ const ManageHRs = () => {
                         </option>
                       ))}
                     </select>
+                    {errors.unit && <div className="form-error-message">⚠️ {errors.unit}</div>}
                   </div>
 
                 </div>
@@ -287,7 +355,7 @@ const ManageHRs = () => {
                     Cancel
                   </button>
                   <button type="submit" className="btn-primary" disabled={loading}>
-                    {showEditModal ? 'Update HR' : 'Create HR'}
+                    {loading ? '⏳ Processing...' : (showEditModal ? '✓ Update HR' : '✓ Create HR')}
                   </button>
                 </div>
 
