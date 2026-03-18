@@ -111,32 +111,31 @@ const computeDerivedFields = (data, existingData = {}) => {
   const pl = safe(data.pl);
   const blOrMl = safe(data.blOrMl);
 
-  /* =====================================================
-     DAYS PAID LOGIC
-     Paid days = worked days + paid leave
-  ===================================================== */
+/* =====================================================
+   DAYS PAID LOGIC
+===================================================== */
 
-  let daysPaid;
+let daysPaid;
 
-  if (isManuallyProvided(data.daysPaid, existingData.daysPaid)) {
-    daysPaid = safe(data.daysPaid);
-  } else {
-    daysPaid = daysWorked + al;
-  }
+if (isManuallyProvided(data.daysPaid, existingData.daysPaid)) {
+  daysPaid = safe(data.daysPaid);
+} else {
+  daysPaid = safe(data.daysPaid);
+}
 
-  /* =====================================================
-     LOP LOGIC
-     LOP = Total Days - Paid Days
-  ===================================================== */
+/* =====================================================
+   LOP LOGIC (SOURCE OF TRUTH)
+   LOP = totalDays - daysPaid
+===================================================== */
 
-  let lop;
+let lop;
 
-  if (isManuallyProvided(data.lop, existingData.lop)) {
-    lop = safe(data.lop);
-  } else {
-    lop = Math.max(totalDays - daysPaid, 0);
-  }
-
+if (isManuallyProvided(data.lop, existingData.lop)) {
+  lop = safe(data.lop);
+} else {
+  lop = totalDays - daysPaid;
+  if (lop < 0) lop = 0;
+}
   // ---------------------------------
   // Salary component calculations continue below
   // ---------------------------------
@@ -210,7 +209,9 @@ const computeDerivedFields = (data, existingData = {}) => {
 
   // Other calculations
   // GPAP should always be 0 unless manually entered
-  const gpap = isManuallyProvided(data.gpap, existingData.gpap) ? safe(data.gpap) : 0;
+  const gpap = data.gpap !== undefined
+  ? safe(data.gpap)   // only if user edits manually
+  : 0;                // always 0 in auto generation
 
   const otherDeductions = isManuallyProvided(data.otherDeductions, existingData.otherDeductions) ? safe(data.otherDeductions) : 0;
 
@@ -351,7 +352,6 @@ const salaryHistories = await SalaryHistory.find({ empId })
 
 
 // ===== ANNUAL LEAVE FROM MONTHLY SUMMARY =====
-
 const totalPresent = safe(summary.totalPresent);
 const totalWO = safe(summary.totalWOCount);
 const totalHO = safe(summary.totalHOCount);
@@ -359,21 +359,27 @@ const totalHO = safe(summary.totalHOCount);
 const totalALF = safe(summary.totalALF);
 const totalALH = safe(summary.totalALH);
 
-// AL calculation
+// AL
 const usedAL = totalALF + (totalALH * 0.5);
 
-// days worked (include ALH half-day worked)
-const daysWorked =
-  totalPresent +
-  (totalALH * 0.5) +
-  totalWO +
-  totalHO;
+const totalPL = safe(summary.totalPL || 0);
+const totalBLML = safe(summary.totalBLML || 0);
 
-// total days in payroll month
+// 🔥 FIXED
+const daysWorked = totalPresent;
+
+// total days (correct already)
 const totalDaysInMonth = safe(summary.totalDays);
 
+// days paid
+const daysPaid =
+  daysWorked +
+  usedAL +
+  totalPL +
+  totalBLML;
+
 // LOP
-let lopDays = totalDaysInMonth - (daysWorked + usedAL);
+let lopDays = totalDaysInMonth - daysPaid;
 if (lopDays < 0) lopDays = 0;
 // ===============================
 // 🔥 GET CORRECT SALARY HISTORY
@@ -452,10 +458,13 @@ const base = {
   // Attendance
   totalDays: totalDaysInMonth,
   daysWorked,
+  daysPaid,
 
   // Paid Leave
   al: usedAL,
   AL: usedAL,
+  pl: totalPL,
+  blOrMl: totalBLML,
 
   // Unpaid Leave
   lop: lopDays,
@@ -473,6 +482,11 @@ const base = {
 
   actualCTCWithoutLOP: actualCTC
 };
+
+// 🔥 REMOVE OLD GPAP BEFORE COMPUTE
+if (existingSalary) {
+  existingSalary.gpap = undefined;
+}
 
 const computed = computeDerivedFields(base, existingSalary || {});
 allDocs.push({ ...base, ...computed });

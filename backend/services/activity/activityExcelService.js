@@ -353,18 +353,18 @@ else if (attendance.half) {
 }
 
 
-    /* =========================
-       APPLY COUNTERS
-       ONLY IF FINAL STATUS = P
-    ========================= */
-    if (status === 'P') {
-      if (attendance.lateUsed > 0) {
-        counters.late += attendance.lateUsed;
-      }
-      if (attendance.permissionUsed > 0) {
-        counters.permission += attendance.permissionUsed;
-      }
-    }
+/* =========================
+   APPLY COUNTERS (FINAL FIX)
+========================= */
+
+// 🔥 Apply regardless of status (IMPORTANT)
+if (attendance.lateUsed > 0 && counters.late < 3) {
+  counters.late += 1;
+}
+
+if (attendance.permissionUsed > 0 && counters.permission < 2) {
+  counters.permission += 1;
+}
 
     /* =========================
        TIME CALCULATIONS

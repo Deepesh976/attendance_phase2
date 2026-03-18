@@ -4,12 +4,12 @@
    CONSTANTS (SECONDS)
 ========================= */
 const TIMES = {
-  T_09_16: 9 * 3600 + 16 * 60,        // 09:16
-  T_09_30: 9 * 3600 + 30 * 60,        // 09:30
-  T_11_00: 11 * 3600,                // 11:00
-  T_13_00: 13 * 3600,                // 13:00
-  T_15_30: 15 * 3600 + 30 * 60,      // 15:30
-  T_17_30: 17 * 3600 + 30 * 60,      // 17:30
+  T_09_16: 9 * 3600 + 16 * 60,
+  T_09_30: 9 * 3600 + 30 * 60,
+  T_11_00: 11 * 3600,
+  T_13_00: 13 * 3600,
+  T_15_30: 15 * 3600 + 30 * 60,
+  T_17_30: 17 * 3600 + 30 * 60,
 };
 
 const LIMITS = {
@@ -27,23 +27,9 @@ const timeToSeconds = (t) => {
 };
 
 /* =========================
-   CORE ENGINE (FINAL – HR CORRECT)
+   CORE ENGINE
 ========================= */
-/**
- * RULES GUARANTEED
- * ----------------
- * ✔ Late allowed = 3
- * ✔ Permission allowed = 2
- * ✔ Late window: 09:16:01 – 11:00
- * ✔ Early window: 15:30:01 – 17:29
- * ✔ Late + Early = 2 permissions
- * ✔ If permissions insufficient → ½P
- * ✔ <11:00 IN → never auto ½P
- * ✔ >11:00 IN → ½P
- * ✔ <15:30 OUT → ½P
- * ✔ Counters are READ-ONLY (snapshot)
- * ✔ Counters are updated OUTSIDE
- */
+
 function evaluateAttendanceDay({
   inTime,
   outTime,
@@ -62,8 +48,9 @@ function evaluateAttendanceDay({
   };
 
   /* =========================
-     STEP 1: HOLIDAY / WEEK OFF
+     STEP 1: HOLIDAY / WO
   ========================= */
+
   if (isHoliday) {
     decision.ho = true;
     return decision;
@@ -78,8 +65,9 @@ function evaluateAttendanceDay({
   const outS = timeToSeconds(outTime);
 
   /* =========================
-     STEP 2: NO CHECK-IN
+     STEP 2: NO CHECKIN
   ========================= */
+
   if (inS === null) {
     decision.absent = true;
     return decision;
@@ -87,41 +75,69 @@ function evaluateAttendanceDay({
 
   /* =========================
      STEP 3: IN-TIME RULES
-     (NO HALF DAY HERE)
   ========================= */
 
-  // ✅ On time / grace
+  // ✅ On-time
   if (inS <= TIMES.T_09_16) {
     decision.present = true;
   }
 
-  // 🟡 Late window (09:16:01 – 09:30)
+  /* =========================
+     LATE WINDOW
+     09:16:01 → 09:30
+  ========================= */
   else if (inS <= TIMES.T_09_30) {
-    decision.present = true;
 
+    // Late still available
     if (counters.late < LIMITS.LATE) {
+      decision.present = true;
       decision.lateUsed = 1;
-    } else if (counters.permission < LIMITS.PERMISSION) {
+    }
+
+    // Late exhausted → use permission
+    else if (counters.permission < LIMITS.PERMISSION) {
+      decision.present = true;
       decision.permissionUsed = 1;
+    }
+
+    // Late + permission exhausted
+    else {
+      decision.half = true;
+      return decision;
     }
   }
 
-  // 🟡 Permission window (09:30:01 – 11:00)
+  /* =========================
+     PERMISSION WINDOW
+     09:30:01 → 11:00
+  ========================= */
   else if (inS <= TIMES.T_11_00) {
-    decision.present = true;
 
     if (counters.permission < LIMITS.PERMISSION) {
+      decision.present = true;
       decision.permissionUsed = 1;
+    }
+
+    else {
+      decision.half = true;
+      return decision;
     }
   }
 
-  // 🟠 Half day (11:00:01 – 13:00)
+  /* =========================
+     HALF DAY ENTRY
+     11:00:01 → 13:00
+  ========================= */
+
   else if (inS <= TIMES.T_13_00) {
     decision.half = true;
     return decision;
   }
 
-  // 🔴 Absent (>13:00)
+  /* =========================
+     ABSENT
+  ========================= */
+
   else {
     decision.absent = true;
     return decision;
@@ -130,28 +146,36 @@ function evaluateAttendanceDay({
   /* =========================
      STEP 4: SHORT CIRCUIT
   ========================= */
+
   if (!decision.present || outS === null) {
     return decision;
   }
 
   /* =========================
      STEP 5: OUT-TIME RULES
-     (THIS decides FULL vs HALF)
   ========================= */
 
   const totalPermissionsUsed =
     counters.permission + decision.permissionUsed;
 
-  // ✅ Full day
+  /* =========================
+     FULL DAY EXIT
+  ========================= */
+
   if (outS >= TIMES.T_17_30) {
     return decision;
   }
 
-  // 🟡 Early exit (15:30:01 – 17:29)
+  /* =========================
+     EARLY EXIT WINDOW
+     15:30 → 17:29
+  ========================= */
+
   if (outS >= TIMES.T_15_30) {
+
     if (totalPermissionsUsed < LIMITS.PERMISSION) {
-      decision.permissionUsed += 1; // 🔥 second permission
-      return decision; // still PRESENT
+      decision.permissionUsed += 1;
+      return decision;
     }
 
     decision.present = false;
@@ -159,7 +183,10 @@ function evaluateAttendanceDay({
     return decision;
   }
 
-  // 🟠 Very early exit (<15:30) → HALF DAY
+  /* =========================
+     VERY EARLY EXIT
+  ========================= */
+
   decision.present = false;
   decision.half = true;
   return decision;

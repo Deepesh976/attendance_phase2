@@ -18,6 +18,7 @@ const {
   saveMonthlySummary,
 } = require('../services/activity/monthlySummaryService');
 
+
 const {
   generateMonthlySummaryForCycle,
 } = require('../services/activity/monthlySummaryBatchService');
@@ -227,10 +228,17 @@ for (const holiday of holidays) {
    6️⃣ MONTHLY SUMMARY (FULL PAYROLL CYCLE – FIXED)
    🔥 DB IS SOURCE OF TRUTH
 ====================================================== */
+// 🔥 Regenerate summary for ALL employees in uploaded file
 
-// Use TO date as payroll anchor (21 → 20 handled inside service)
-await generateMonthlySummaryForCycle(toNorm);
+const {
+  regenerateMonthlySummaryForEmployee,
+} = require('../services/activity/monthlySummaryGenerator');
 
+const empIds = [...new Set(normalizedActivities.map(a => a.empId))];
+
+for (const empId of empIds) {
+  await regenerateMonthlySummaryForEmployee(empId);
+}
 
 /* ======================================================
    ✅ RESPONSE (ONLY ONCE)

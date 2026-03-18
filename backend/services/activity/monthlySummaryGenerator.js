@@ -2,13 +2,13 @@ const Activity = require('../../models/Activity');
 const {
   calculateMonthlySummary,
   saveMonthlySummary,
-  getPayrollCycleFromDate,
+  getPayrollCycleKey,
+  getCycleMetaFromKey
 } = require('./monthlySummaryService');
 
 /**
  * Regenerate monthly summaries for a SINGLE employee
  * 🔒 Payroll cycle: 21 → 20
- * 📊 Total days: FROM ATTENDANCE COUNTS
  */
 const regenerateMonthlySummaryForEmployee = async (empId) => {
   if (!empId) return;
@@ -17,16 +17,17 @@ const regenerateMonthlySummaryForEmployee = async (empId) => {
   if (!activities.length) return;
 
   /* =========================
-     GROUP ACTIVITIES BY PAYROLL CYCLE (21 → 20)
+     GROUP BY PAYROLL CYCLE (FIXED)
   ========================= */
   const cycles = {};
 
   for (const act of activities) {
-    const { year, month } = getPayrollCycleFromDate(act.date);
-    const key = `${year}-${month}`;
+    const cycleKey = getPayrollCycleKey(act.date);
 
-    if (!cycles[key]) {
-      cycles[key] = {
+    if (!cycles[cycleKey]) {
+      const { year, month } = getCycleMetaFromKey(cycleKey);
+
+      cycles[cycleKey] = {
         empName: act.empName,
         year,
         month,
@@ -34,53 +35,30 @@ const regenerateMonthlySummaryForEmployee = async (empId) => {
       };
     }
 
-    cycles[key].activities.push(act);
+    cycles[cycleKey].activities.push(act);
   }
 
   /* =========================
-     GENERATE & SAVE SUMMARIES
+     GENERATE & SAVE
   ========================= */
-  for (const key of Object.keys(cycles)) {
-    const { empName, activities, year, month } = cycles[key];
+  for (const cycleKey of Object.keys(cycles)) {
+    const { empName, activities, year, month } = cycles[cycleKey];
     if (!activities.length) continue;
 
-    // 🔹 Calculate summary from activities
-    const summary = calculateMonthlySummary(
-      empId,
-      empName,
-      activities
-    );
+const summary = calculateMonthlySummary(
+  empId,
+  empName,
+  activities,
+  cycleKey   // 🔥 THIS IS THE FIX
+);
 
     if (!summary) continue;
 
-    /* ======================================
-       🔥 FINAL TOTAL DAYS (ATTENDANCE SOURCE)
-    ====================================== */
-
-    const totalPresent = Number(summary.totalPresent || 0);
-    const totalAbsent = Number(summary.totalAbsent || 0);
-    const totalWO = Number(summary.totalWOCount || 0);
-    const totalHO = Number(summary.totalHOCount || 0);
-    const totalALF = Number(summary.totalALF || 0);
-    const totalALH = Number(summary.totalALH || 0);
-
-    const finalTotalDays =
-      totalPresent +
-      totalAbsent +
-      totalWO +
-      totalHO +
-      totalALF +
-      totalALH;
-
-    summary.totalDays = finalTotalDays;
-
     /* =========================
-       DEBUG LOG (SAFE)
+       DEBUG LOG
     ========================= */
     console.log(
-      `📊 MonthlySummary | ${empId} | ${month}/${year} | ` +
-      `P=${totalPresent}, A=${totalAbsent}, WO=${totalWO}, HO=${totalHO}, ` +
-      `ALF=${totalALF}, ALH=${totalALH}, TOTAL=${finalTotalDays}`
+      `📊 MonthlySummary | ${empId} | ${month}/${year} | TOTAL=${summary.totalDays}`
     );
 
     await saveMonthlySummary(summary);

@@ -190,9 +190,9 @@ const computeDerivedFields = (data, existingData = {}) => {
     else pt = 100;
   }
 
-  const gpap = isManuallyProvided(data.gpap, existingData.gpap)
-    ? safe(data.gpap)
-    : (consileSalary * 12 * 5 * 0.12) / 100 / 12;
+const gpap = isManuallyProvided(data.gpap, existingData.gpap)
+  ? safe(data.gpap)
+  : 0;
 
   const otherDeductions = isManuallyProvided(
     data.otherDeductions,
@@ -341,11 +341,15 @@ const holiday = safe(summary.totalHOCount);
 const alf = safe(summary.totalALF);
 const alh = safe(summary.totalALH);
 
-// 🔥 total AL (full + half)
-const al = alf + alh;
+// ✅ AL = only full AL + half AL (correct)
+const al = alf + (alh * 0.5);
 
-    // ✅ PAID DAYS = Present + WO + Holiday
-    const daysPaid = present + weeklyOff + holiday + al;
+// ✅ present already includes ALH (0.5), so DON'T double count
+const daysPaid =
+  present +
+  weeklyOff +
+  holiday +
+  alf;   // only full AL added
 
     // ✅ LOP = Total Days - Paid Days
     const lop = Math.max(totalDays - daysPaid, 0);

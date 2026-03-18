@@ -5,6 +5,7 @@ const MonthlySummary = require('../../models/MonthlySummary');
    Cycle = 21st → 20th
 ========================================================= */
 
+// 🔥 Get cycle key (based on 21st)
 const getPayrollCycleKey = (date) => {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
@@ -14,47 +15,45 @@ const getPayrollCycleKey = (date) => {
   }
 
   d.setDate(21);
-  return d.toISOString().slice(0, 10);
+
+  return new Date(
+    d.getFullYear(),
+    d.getMonth(),
+    21
+  ).toISOString().slice(0, 10);
 };
 
+
+// 🔥 SAFE cycle meta (NO overflow bugs)
 const getCycleMetaFromKey = (cycleKey) => {
-  const cycleStart = new Date(cycleKey);
-  cycleStart.setHours(0, 0, 0, 0);
+  const start = new Date(cycleKey);
 
-  const cycleEnd = new Date(cycleStart);
-  cycleEnd.setMonth(cycleEnd.getMonth() + 1);
-  cycleEnd.setDate(20);
-  cycleEnd.setHours(23, 59, 59, 999);
+  const cycleStart = new Date(
+    start.getFullYear(),
+    start.getMonth(),
+    21
+  );
 
-  const year = cycleStart.getFullYear();
-  const month = cycleStart.getMonth() + 1;
+  const cycleEnd = new Date(
+    cycleStart.getFullYear(),
+    cycleStart.getMonth() + 1,
+    20
+  );
 
-  return { year, month, cycleStart, cycleEnd };
+  // 🔥 Payroll month = END month
+  const year = cycleEnd.getFullYear();
+  const month = cycleEnd.getMonth() + 1;
+
+  return { cycleStart, cycleEnd, year, month };
 };
+
 
 /* =========================================================
    CALCULATE MONTHLY SUMMARY
 ========================================================= */
 
-const calculateMonthlySummary = (empId, empName, activities) => {
+const calculateMonthlySummary = (empId, empName, activities, cycleKey) => {
   if (!activities || !activities.length) return null;
-
-  /* =========================
-     GROUP BY PAYROLL CYCLE
-  ========================= */
-
-  const cycleMap = {};
-
-  for (const act of activities) {
-    const key = getPayrollCycleKey(act.date);
-    if (!cycleMap[key]) cycleMap[key] = [];
-    cycleMap[key].push(act);
-  }
-
-  const cycleKey = Object.keys(cycleMap)[0];
-  if (!cycleKey) return null;
-
-  const cycleActs = cycleMap[cycleKey];
 
   /* =========================
      COUNTERS
@@ -72,7 +71,8 @@ const calculateMonthlySummary = (empId, empName, activities) => {
      COUNT STATUS
   ========================= */
 
-  for (const act of cycleActs) {
+  // ✅ FIXED: using correct variable
+  for (const act of activities) {
     switch (act.status) {
 
       case 'P':
@@ -91,10 +91,10 @@ const calculateMonthlySummary = (empId, empName, activities) => {
         totalALF += 1;
         break;
 
-case 'ALH':
-  totalALH += 0.5;
-  totalPresent += 0.5;
-  break;
+      case 'ALH':
+        totalALH += 0.5;
+        totalPresent += 0.5;
+        break;
 
       case 'WO':
         totalWOCount += 1;
@@ -121,36 +121,39 @@ case 'ALH':
     getCycleMetaFromKey(cycleKey);
 
   /* =========================================================
-     FINAL TOTAL DAYS
+     🔥 TOTAL DAYS (SOURCE OF TRUTH)
+     ALWAYS based on 21 → 20 cycle
   ========================================================= */
 
-const totalDays =
-  totalPresent +
-  totalAbsent +
-  totalWOCount +
-  totalHOCount +
-  totalALF +
-  totalALH; 
+  const start = new Date(cycleStart);
+  const end = new Date(cycleEnd);
+
+  start.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+
+  const diffTime = end.getTime() - start.getTime();
+
+  const totalDays =
+    Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
   /* =========================================================
      DAYS WORKED (FOR SALARY)
   ========================================================= */
 
+  // ✅ FIXED: completed calculation
   const daysWorked =
     totalPresent +
     totalWOCount +
     totalHOCount +
     totalALF +
-    totalALH;
+    (totalALH || 0);
 
   /* =========================================================
-     DEBUG LOG
+     DEBUG
   ========================================================= */
 
   console.log(
-    `📊 MonthlySummary | ${empId} | ${month}/${year} | ` +
-    `P=${totalPresent}, A=${totalAbsent}, WO=${totalWOCount}, HO=${totalHOCount}, ` +
-    `ALF=${totalALF}, ALH=${totalALH}, TOTAL=${totalDays}`
+    `📊 MonthlySummary | ${empId} | ${month}/${year} | TOTAL=${totalDays}`
   );
 
   return {
@@ -159,6 +162,7 @@ const totalDays =
 
     year,
     month,
+
     cycleStart,
     cycleEnd,
 
@@ -178,6 +182,7 @@ const totalDays =
   };
 };
 
+
 /* =========================================================
    SAVE SUMMARY
 ========================================================= */
@@ -196,7 +201,41 @@ const saveMonthlySummary = async (summary) => {
   );
 };
 
+
+/* =========================================================
+   PAYROLL CYCLE FROM DATE (FOR GROUPING)
+========================================================= */
+
+const getPayrollCycleFromDate = (date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+
+    
+
+  if (d.getDate() < 21) {
+    month -= 1;
+
+    if (month === 0) {
+      month = 12;
+      year -= 1;
+    }
+  }
+
+  return { year, month };
+};
+
+
+/* =========================================================
+   EXPORTS
+========================================================= */
+
 module.exports = {
   calculateMonthlySummary,
   saveMonthlySummary,
+  getPayrollCycleFromDate,
+  getPayrollCycleKey,
+  getCycleMetaFromKey
 };

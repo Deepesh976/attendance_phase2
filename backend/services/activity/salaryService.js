@@ -164,7 +164,7 @@ const computeDerivedFields = (data, existingData = {}) => {
 const al = safe(data.al);
 
 // Base LOP before AL adjustment
-const baseLop = Math.max(totalDays - daysWorked, 0);
+const baseLop = safe(data.lop || 0);
 
 const lop = isManuallyProvided(data.lop, existingData.lop)
   ? safe(data.lop)
@@ -172,7 +172,7 @@ const lop = isManuallyProvided(data.lop, existingData.lop)
 
 const daysPaid = isManuallyProvided(data.daysPaid, existingData.daysPaid)
   ? safe(data.daysPaid)
-  : totalDays - lop;
+  : safe(data.daysPaid || 0);
 
 
   /* ===============================
@@ -259,9 +259,9 @@ const daysPaid = isManuallyProvided(data.daysPaid, existingData.daysPaid)
     else pt = 100;
   }
 
-  const gpap = isManuallyProvided(data.gpap, existingData.gpap)
-    ? safe(data.gpap)
-    : 0;
+const gpap = data.gpap !== undefined
+  ? safe(data.gpap)   // only if coming from manual update
+  : 0;                // 🔥 always reset during generation
 
   const otherDeductions = isManuallyProvided(
     data.otherDeductions,
@@ -466,19 +466,19 @@ const generateSalaryRecords = async () => {
         month: monthName
       });
 
-      /* ===============================
-         ATTENDANCE DATA
-      =============================== */
+/* ===============================
+   ATTENDANCE DATA
+=============================== */
 
-      const totalPresent = safe(summary.totalPresent);
-      const totalWO = safe(summary.totalWOCount);
-      const totalHolidays = safe(summary.totalHOCount);
+const totalPresent = safe(summary.totalPresent);
+const totalWO = safe(summary.totalWOCount);
+const totalHolidays = safe(summary.totalHOCount);
 
-      const totalDaysInMonth = safe(summary.totalDays);
+const totalDaysInMonth = safe(summary.totalDays);
 
-      /* ===============================
-         ANNUAL LEAVE (MANUAL ENTRY)
-      =============================== */
+/* ===============================
+   ANNUAL LEAVE
+=============================== */
 
 const totalALF = safe(summary.totalALF);
 const totalALH = safe(summary.totalALH);
@@ -487,28 +487,40 @@ const usedAL =
   totalALF +
   (totalALH * 0.5);
 
-      /* ===============================
-         DAYS WORKED
-      =============================== */
+const totalPL = safe(summary.totalPL || 0);
+const totalBLML = safe(summary.totalBLML || 0);
 
-      const daysWorked =
-        totalPresent +
-        totalWO +
-        totalHolidays +
-        usedAL;
+/* ===============================
+   DAYS WORKED (FIXED ✅)
+=============================== */
 
-      /* ===============================
-         LOP CALCULATION
-      =============================== */
+const daysWorked = totalPresent;
 
-      let lopDays = totalDaysInMonth - daysWorked;
-      if (lopDays < 0) lopDays = 0;
+/* ===============================
+   PAID LEAVES
+=============================== */
 
-      console.log(
-        `📊 ${empId} ${monthName}-${year} | Total=${totalDaysInMonth}, Worked=${daysWorked}, AL=${usedAL}, LOP=${lopDays}`
-      );
+const paidLeaves =
+  usedAL +
+  totalPL +
+  totalBLML;
 
-      const resolvedCTC = await getCTCForMonth(empId, year, monthName);
+/* ===============================
+   DAYS PAID
+=============================== */
+
+const daysPaid = daysWorked + paidLeaves;
+
+/* ===============================
+   LOP
+=============================== */
+
+let lopDays = totalDaysInMonth - daysPaid;
+if (lopDays < 0) lopDays = 0;
+
+console.log(
+  `📊 ${empId} ${monthName}-${year} | Total=${totalDaysInMonth}, Worked=${daysWorked}, AL=${usedAL}, LOP=${lopDays}`
+);
 
       /* ===============================
          BASE SALARY OBJECT
@@ -533,8 +545,14 @@ const usedAL =
         holiday: totalHolidays,
 
         // Leave
-        al: usedAL,
-        lop: lopDays,
+        // Leave
+al: usedAL,
+pl: totalPL,
+blOrMl: totalBLML,
+lop: lopDays,
+
+// Attendance FIX
+daysWorked,
 
         // Salary Inputs
         consileSalary: safe(input.CONSILESALARY),
@@ -551,8 +569,13 @@ const usedAL =
         )
       };
 
-      const computed = computeDerivedFields(base, existingSalary || {});
-      allDocs.push({ ...base, ...computed });
+// 🔥 REMOVE ANY OLD GPAP BEFORE COMPUTE
+if (existingSalary) {
+  existingSalary.gpap = undefined;
+}
+
+const computed = computeDerivedFields(base, existingSalary || {});
+allDocs.push({ ...base, ...computed });
     }
   }
 
